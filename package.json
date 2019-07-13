@@ -1,0 +1,7 @@
+{
+  "dependencies": {
+    "benchmark": "^2.1.4",
+    "elm": "^0.19.0-no-deps",
+    "leven": "^3.1.0"
+  }
+}

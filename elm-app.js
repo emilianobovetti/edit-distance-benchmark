@@ -1644,6 +1644,43 @@ var _Json_encodeNull = _Json_wrap(null);
 
 
 
+var _Bitwise_and = F2(function(a, b)
+{
+	return a & b;
+});
+
+var _Bitwise_or = F2(function(a, b)
+{
+	return a | b;
+});
+
+var _Bitwise_xor = F2(function(a, b)
+{
+	return a ^ b;
+});
+
+function _Bitwise_complement(a)
+{
+	return ~a;
+};
+
+var _Bitwise_shiftLeftBy = F2(function(offset, a)
+{
+	return a << offset;
+});
+
+var _Bitwise_shiftRightBy = F2(function(offset, a)
+{
+	return a >> offset;
+});
+
+var _Bitwise_shiftRightZfBy = F2(function(offset, a)
+{
+	return a >>> offset;
+});
+
+
+
 // TASKS
 
 function _Scheduler_succeed(value)
@@ -2804,16 +2841,169 @@ var author$project$Main$calcDistance = _Platform_incomingPort(
 				A2(elm$json$Json$Decode$field, 'pattern', elm$json$Json$Decode$string));
 		},
 		A2(elm$json$Json$Decode$field, 'text', elm$json$Json$Decode$string)));
-var elm$json$Json$Encode$int = _Json_wrap;
-var author$project$Main$sendDistance = _Platform_outgoingPort('sendDistance', elm$json$Json$Encode$int);
-var elm$core$String$length = _String_length;
-var elm$core$String$foldr = _String_foldr;
-var elm$core$String$toList = function (string) {
-	return A3(elm$core$String$foldr, elm$core$List$cons, _List_Nil, string);
+var author$project$EditDistance$min3 = F3(
+	function (a, b, c) {
+		return ((_Utils_cmp(a, b) < 1) && (_Utils_cmp(a, c) < 1)) ? a : ((_Utils_cmp(b, c) < 1) ? b : c);
+	});
+var elm$core$Bitwise$shiftRightZfBy = _Bitwise_shiftRightZfBy;
+var elm$core$Array$bitMask = 4294967295 >>> (32 - elm$core$Array$shiftStep);
+var elm$core$Bitwise$and = _Bitwise_and;
+var elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
+var elm$core$Array$getHelp = F3(
+	function (shift, index, tree) {
+		getHelp:
+		while (true) {
+			var pos = elm$core$Array$bitMask & (index >>> shift);
+			var _n0 = A2(elm$core$Elm$JsArray$unsafeGet, pos, tree);
+			if (!_n0.$) {
+				var subTree = _n0.a;
+				var $temp$shift = shift - elm$core$Array$shiftStep,
+					$temp$index = index,
+					$temp$tree = subTree;
+				shift = $temp$shift;
+				index = $temp$index;
+				tree = $temp$tree;
+				continue getHelp;
+			} else {
+				var values = _n0.a;
+				return A2(elm$core$Elm$JsArray$unsafeGet, elm$core$Array$bitMask & index, values);
+			}
+		}
+	});
+var elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
+var elm$core$Array$tailIndex = function (len) {
+	return (len >>> 5) << 5;
 };
+var elm$core$Basics$ge = _Utils_ge;
+var elm$core$Array$get = F2(
+	function (index, _n0) {
+		var len = _n0.a;
+		var startShift = _n0.b;
+		var tree = _n0.c;
+		var tail = _n0.d;
+		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? elm$core$Maybe$Nothing : ((_Utils_cmp(
+			index,
+			elm$core$Array$tailIndex(len)) > -1) ? elm$core$Maybe$Just(
+			A2(elm$core$Elm$JsArray$unsafeGet, elm$core$Array$bitMask & index, tail)) : elm$core$Maybe$Just(
+			A3(elm$core$Array$getHelp, startShift, index, tree)));
+	});
+var elm$core$Elm$JsArray$unsafeSet = _JsArray_unsafeSet;
+var elm$core$Array$setHelp = F4(
+	function (shift, index, value, tree) {
+		var pos = elm$core$Array$bitMask & (index >>> shift);
+		var _n0 = A2(elm$core$Elm$JsArray$unsafeGet, pos, tree);
+		if (!_n0.$) {
+			var subTree = _n0.a;
+			var newSub = A4(elm$core$Array$setHelp, shift - elm$core$Array$shiftStep, index, value, subTree);
+			return A3(
+				elm$core$Elm$JsArray$unsafeSet,
+				pos,
+				elm$core$Array$SubTree(newSub),
+				tree);
+		} else {
+			var values = _n0.a;
+			var newLeaf = A3(elm$core$Elm$JsArray$unsafeSet, elm$core$Array$bitMask & index, value, values);
+			return A3(
+				elm$core$Elm$JsArray$unsafeSet,
+				pos,
+				elm$core$Array$Leaf(newLeaf),
+				tree);
+		}
+	});
+var elm$core$Array$set = F3(
+	function (index, value, array) {
+		var len = array.a;
+		var startShift = array.b;
+		var tree = array.c;
+		var tail = array.d;
+		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? array : ((_Utils_cmp(
+			index,
+			elm$core$Array$tailIndex(len)) > -1) ? A4(
+			elm$core$Array$Array_elm_builtin,
+			len,
+			startShift,
+			tree,
+			A3(elm$core$Elm$JsArray$unsafeSet, elm$core$Array$bitMask & index, value, tail)) : A4(
+			elm$core$Array$Array_elm_builtin,
+			len,
+			startShift,
+			A4(elm$core$Array$setHelp, startShift, index, value, tree),
+			tail));
+	});
+var elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (!maybe.$) {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
+var author$project$EditDistance$patternLoop = F7(
+	function (textHead, pattern, idx, b0, b1, b2, col) {
+		patternLoop:
+		while (true) {
+			if (pattern.b) {
+				var patternHead = pattern.a;
+				var patternTail = pattern.b;
+				var b2_ = _Utils_eq(textHead, patternHead) ? b0 : (1 + A3(author$project$EditDistance$min3, b0, b1, b2));
+				var updateCol = A3(elm$core$Array$set, idx, b2_, col);
+				var b0_ = b1;
+				var b1_ = A2(
+					elm$core$Maybe$withDefault,
+					b0_,
+					A2(elm$core$Array$get, idx + 1, col));
+				var $temp$textHead = textHead,
+					$temp$pattern = patternTail,
+					$temp$idx = idx + 1,
+					$temp$b0 = b0_,
+					$temp$b1 = b1_,
+					$temp$b2 = b2_,
+					$temp$col = updateCol;
+				textHead = $temp$textHead;
+				pattern = $temp$pattern;
+				idx = $temp$idx;
+				b0 = $temp$b0;
+				b1 = $temp$b1;
+				b2 = $temp$b2;
+				col = $temp$col;
+				continue patternLoop;
+			} else {
+				return col;
+			}
+		}
+	});
 var elm$core$Basics$negate = function (n) {
 	return -n;
 };
+var author$project$EditDistance$textLoop = F4(
+	function (text, pattern, idx, col) {
+		textLoop:
+		while (true) {
+			if (text.b) {
+				var textHead = text.a;
+				var textTail = text.b;
+				var b2 = idx + 1;
+				var b1 = A2(
+					elm$core$Maybe$withDefault,
+					-1,
+					A2(elm$core$Array$get, 0, col));
+				var b0 = idx;
+				var updateCol = A7(author$project$EditDistance$patternLoop, textHead, pattern, 0, b0, b1, b2, col);
+				var $temp$text = textTail,
+					$temp$pattern = pattern,
+					$temp$idx = idx + 1,
+					$temp$col = updateCol;
+				text = $temp$text;
+				pattern = $temp$pattern;
+				idx = $temp$idx;
+				col = $temp$col;
+				continue textLoop;
+			} else {
+				return col;
+			}
+		}
+	});
 var elm$core$List$any = F2(
 	function (isOkay, list) {
 		any:
@@ -2835,108 +3025,7 @@ var elm$core$List$any = F2(
 			}
 		}
 	});
-var elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (!maybe.$) {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
-var emilianobovetti$edit_distance$EditDistance$last = function (list) {
-	last:
-	while (true) {
-		if (list.b) {
-			if (!list.b.b) {
-				var value = list.a;
-				return elm$core$Maybe$Just(value);
-			} else {
-				if (!list.b.b.b) {
-					var _n1 = list.b;
-					var value = _n1.a;
-					return elm$core$Maybe$Just(value);
-				} else {
-					var _n2 = list.b;
-					var tail = _n2.b;
-					var $temp$list = tail;
-					list = $temp$list;
-					continue last;
-				}
-			}
-		} else {
-			return elm$core$Maybe$Nothing;
-		}
-	}
-};
-var emilianobovetti$edit_distance$EditDistance$min3 = F3(
-	function (a, b, c) {
-		return ((_Utils_cmp(a, b) < 1) && (_Utils_cmp(a, c) < 1)) ? a : ((_Utils_cmp(b, c) < 1) ? b : c);
-	});
-var emilianobovetti$edit_distance$EditDistance$patternLoop = F7(
-	function (textHead, pattern, idx, b0, b1, b2, prev) {
-		var _n0 = _Utils_Tuple2(pattern, prev);
-		if (_n0.a.b) {
-			if (_n0.b.b) {
-				var _n1 = _n0.a;
-				var patternHead = _n1.a;
-				var patternTail = _n1.b;
-				var _n2 = _n0.b;
-				var prevHead = _n2.a;
-				var prevTail = _n2.b;
-				var b2_ = _Utils_eq(textHead, patternHead) ? b0 : (1 + A3(emilianobovetti$edit_distance$EditDistance$min3, b0, b1, b2));
-				var b1_ = prevHead;
-				var b0_ = b1;
-				return A2(
-					elm$core$List$cons,
-					b2_,
-					A7(emilianobovetti$edit_distance$EditDistance$patternLoop, textHead, patternTail, idx + 1, b0_, b1_, b2_, prevTail));
-			} else {
-				var _n3 = _n0.a;
-				var patternHead = _n3.a;
-				return _Utils_eq(textHead, patternHead) ? _List_fromArray(
-					[b0]) : _List_fromArray(
-					[
-						1 + A3(emilianobovetti$edit_distance$EditDistance$min3, b0, b1, b2)
-					]);
-			}
-		} else {
-			return _List_Nil;
-		}
-	});
-var emilianobovetti$edit_distance$EditDistance$initPatternLoop = F4(
-	function (textHead, pattern, b0, prevCol) {
-		if (prevCol.b) {
-			var prevHead = prevCol.a;
-			var prevTail = prevCol.b;
-			return A7(emilianobovetti$edit_distance$EditDistance$patternLoop, textHead, pattern, 1, b0, prevHead, b0 + 1, prevTail);
-		} else {
-			return _List_Nil;
-		}
-	});
-var emilianobovetti$edit_distance$EditDistance$textLoop = F4(
-	function (text, pattern, idx, col) {
-		textLoop:
-		while (true) {
-			if (!text.b) {
-				return col;
-			} else {
-				var textHead = text.a;
-				var textTail = text.b;
-				var nextCol = A4(emilianobovetti$edit_distance$EditDistance$initPatternLoop, textHead, pattern, idx - 1, col);
-				var $temp$text = textTail,
-					$temp$pattern = pattern,
-					$temp$idx = idx + 1,
-					$temp$col = nextCol;
-				text = $temp$text;
-				pattern = $temp$pattern;
-				idx = $temp$idx;
-				col = $temp$col;
-				continue textLoop;
-			}
-		}
-	});
-var emilianobovetti$edit_distance$EditDistance$levenshtein = F2(
+var author$project$EditDistance$levenshtein = F2(
 	function (text, pattern) {
 		levenshtein:
 		while (true) {
@@ -2976,19 +3065,20 @@ var emilianobovetti$edit_distance$EditDistance$levenshtein = F2(
 								pattern = $temp$pattern;
 								continue levenshtein;
 							} else {
+								var patternLen = elm$core$List$length(pattern);
+								var initCol = A2(
+									elm$core$Array$initialize,
+									patternLen,
+									function (x) {
+										return x + 1;
+									});
 								return A2(
 									elm$core$Maybe$withDefault,
 									-1,
-									emilianobovetti$edit_distance$EditDistance$last(
-										A4(
-											emilianobovetti$edit_distance$EditDistance$textLoop,
-											text,
-											pattern,
-											1,
-											A2(
-												elm$core$List$range,
-												1,
-												elm$core$List$length(pattern)))));
+									A2(
+										elm$core$Array$get,
+										patternLen - 1,
+										A4(author$project$EditDistance$textLoop, text, pattern, 0, initCol)));
 							}
 						}
 					}
@@ -2996,7 +3086,12 @@ var emilianobovetti$edit_distance$EditDistance$levenshtein = F2(
 			}
 		}
 	});
-var emilianobovetti$edit_distance$EditDistance$levenshteinOfStrings = F2(
+var elm$core$String$length = _String_length;
+var elm$core$String$foldr = _String_foldr;
+var elm$core$String$toList = function (string) {
+	return A3(elm$core$String$foldr, elm$core$List$cons, _List_Nil, string);
+};
+var author$project$EditDistance$levenshteinOfStrings = F2(
 	function (text, pattern) {
 		levenshteinOfStrings:
 		while (true) {
@@ -3010,12 +3105,14 @@ var emilianobovetti$edit_distance$EditDistance$levenshteinOfStrings = F2(
 				continue levenshteinOfStrings;
 			} else {
 				return A2(
-					emilianobovetti$edit_distance$EditDistance$levenshtein,
+					author$project$EditDistance$levenshtein,
 					elm$core$String$toList(text),
 					elm$core$String$toList(pattern));
 			}
 		}
 	});
+var elm$json$Json$Encode$int = _Json_wrap;
+var author$project$Main$sendDistance = _Platform_outgoingPort('sendDistance', elm$json$Json$Encode$int);
 var author$project$Main$update = F2(
 	function (_n0, _n1) {
 		var text = _n0.g;
@@ -3023,7 +3120,7 @@ var author$project$Main$update = F2(
 		return _Utils_Tuple2(
 			0,
 			author$project$Main$sendDistance(
-				A2(emilianobovetti$edit_distance$EditDistance$levenshteinOfStrings, text, pattern)));
+				A2(author$project$EditDistance$levenshteinOfStrings, text, pattern)));
 	});
 var elm$core$Basics$identity = function (x) {
 	return x;

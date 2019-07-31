@@ -2,7 +2,6 @@ const Benchmark = require('benchmark');
 
 const leven = require('leven');
 const elmApp = require('./elm-app.js').Elm.Main.init();
-const elmInternals = require('./elm-internals.js');
 
 const log = (...args) => {
   console.log(...args);
@@ -32,9 +31,6 @@ new Benchmark.Suite()
       elmApp.ports.sendDistance.subscribe(_dist => deferred.resolve());
       elmApp.ports.calcDistance.send({ text, pattern });
     }
-  })
-  .add('elm-internals levenshtein', () => {
-    elmInternals.EditDistance$levenshtein(text, pattern);
   })
   .add('leven', () => {
     leven(text, pattern);

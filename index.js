@@ -2,7 +2,7 @@ const Benchmark = require('benchmark');
 
 const leven = require('leven');
 const elmApp = require('./elm-app.js').Elm.Main.init();
-const elmInternals = require('./elm-internals.js');
+const elmInternals = require('./elm-internals.js').Elm;
 
 const log = (...args) => {
   console.log(...args);
@@ -41,9 +41,10 @@ new Benchmark.Suite()
   })
   .on('cycle', event => {
     const { name, stats, times } = event.target;
+    const { sample, ...data } = stats;
 
     log(' === ', name, ' === ');
-    log(stats);
+    log(data);
     log(times);
   })
   .run();

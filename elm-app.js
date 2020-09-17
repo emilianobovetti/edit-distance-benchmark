@@ -2311,6 +2311,43 @@ function _Platform_mergeExportsDebug(moduleName, obj, exports)
 			: (obj[name] = exports[name]);
 	}
 }
+
+
+
+var _Bitwise_and = F2(function(a, b)
+{
+	return a & b;
+});
+
+var _Bitwise_or = F2(function(a, b)
+{
+	return a | b;
+});
+
+var _Bitwise_xor = F2(function(a, b)
+{
+	return a ^ b;
+});
+
+function _Bitwise_complement(a)
+{
+	return ~a;
+};
+
+var _Bitwise_shiftLeftBy = F2(function(offset, a)
+{
+	return a << offset;
+});
+
+var _Bitwise_shiftRightBy = F2(function(offset, a)
+{
+	return a >> offset;
+});
+
+var _Bitwise_shiftRightZfBy = F2(function(offset, a)
+{
+	return a >>> offset;
+});
 var $elm$core$Basics$EQ = 1;
 var $elm$core$Basics$LT = 0;
 var $elm$core$List$cons = _List_cons;
@@ -2839,17 +2876,10 @@ var $emilianobovetti$edit_distance$EditDistance$last = function (list) {
 				var value = list.a;
 				return $elm$core$Maybe$Just(value);
 			} else {
-				if (!list.b.b.b) {
-					var _v1 = list.b;
-					var value = _v1.a;
-					return $elm$core$Maybe$Just(value);
-				} else {
-					var _v2 = list.b;
-					var tail = _v2.b;
-					var $temp$list = tail;
-					list = $temp$list;
-					continue last;
-				}
+				var tail = list.b;
+				var $temp$list = tail;
+				list = $temp$list;
+				continue last;
 			}
 		} else {
 			return $elm$core$Maybe$Nothing;
@@ -2859,31 +2889,31 @@ var $emilianobovetti$edit_distance$EditDistance$last = function (list) {
 var $elm$core$Basics$negate = function (n) {
 	return -n;
 };
+var $elm$core$Bitwise$and = _Bitwise_and;
+var $elm$core$Bitwise$shiftRightBy = _Bitwise_shiftRightBy;
 var $emilianobovetti$edit_distance$EditDistance$min3 = F3(
 	function (a, b, c) {
-		return ((_Utils_cmp(a, b) < 1) && (_Utils_cmp(a, c) < 1)) ? a : ((_Utils_cmp(b, c) < 1) ? b : c);
+		var diff1 = a - b;
+		var minAB = b + (diff1 & (diff1 >> 31));
+		var diff2 = minAB - c;
+		return c + (diff2 & (diff2 >> 31));
 	});
-var $emilianobovetti$edit_distance$EditDistance$patternLoop = F7(
-	function (textHead, pattern, idx, b0, b1, b2, prev) {
-		var _v0 = _Utils_Tuple2(pattern, prev);
-		if (_v0.a.b) {
-			if (_v0.b.b) {
-				var _v1 = _v0.a;
-				var patternHead = _v1.a;
-				var patternTail = _v1.b;
-				var _v2 = _v0.b;
-				var prevHead = _v2.a;
-				var prevTail = _v2.b;
+var $emilianobovetti$edit_distance$EditDistance$patternLoop = F6(
+	function (textHead, pattern, b0, b1, b2, prev) {
+		if (pattern.b) {
+			var patternHead = pattern.a;
+			var patternTail = pattern.b;
+			if (prev.b) {
+				var prevHead = prev.a;
+				var prevTail = prev.b;
 				var b2_ = _Utils_eq(textHead, patternHead) ? b0 : (1 + A3($emilianobovetti$edit_distance$EditDistance$min3, b0, b1, b2));
 				var b1_ = prevHead;
 				var b0_ = b1;
 				return A2(
 					$elm$core$List$cons,
 					b2_,
-					A7($emilianobovetti$edit_distance$EditDistance$patternLoop, textHead, patternTail, idx + 1, b0_, b1_, b2_, prevTail));
+					A6($emilianobovetti$edit_distance$EditDistance$patternLoop, textHead, patternTail, b0_, b1_, b2_, prevTail));
 			} else {
-				var _v3 = _v0.a;
-				var patternHead = _v3.a;
 				return _Utils_eq(textHead, patternHead) ? _List_fromArray(
 					[b0]) : _List_fromArray(
 					[
@@ -2899,7 +2929,7 @@ var $emilianobovetti$edit_distance$EditDistance$initPatternLoop = F4(
 		if (prevCol.b) {
 			var prevHead = prevCol.a;
 			var prevTail = prevCol.b;
-			return A7($emilianobovetti$edit_distance$EditDistance$patternLoop, textHead, pattern, 1, b0, prevHead, b0 + 1, prevTail);
+			return A6($emilianobovetti$edit_distance$EditDistance$patternLoop, textHead, pattern, b0, prevHead, b0 + 1, prevTail);
 		} else {
 			return _List_Nil;
 		}
@@ -3001,23 +3031,15 @@ var $elm$core$String$toList = function (string) {
 };
 var $emilianobovetti$edit_distance$EditDistance$levenshteinOfStrings = F2(
 	function (text, pattern) {
-		levenshteinOfStrings:
-		while (true) {
-			if (_Utils_cmp(
-				$elm$core$String$length(pattern),
-				$elm$core$String$length(text)) > 0) {
-				var $temp$text = pattern,
-					$temp$pattern = text;
-				text = $temp$text;
-				pattern = $temp$pattern;
-				continue levenshteinOfStrings;
-			} else {
-				return A2(
-					$emilianobovetti$edit_distance$EditDistance$levenshtein,
-					$elm$core$String$toList(text),
-					$elm$core$String$toList(pattern));
-			}
-		}
+		return _Utils_eq(text, pattern) ? 0 : ((_Utils_cmp(
+			$elm$core$String$length(pattern),
+			$elm$core$String$length(text)) > 0) ? A2(
+			$emilianobovetti$edit_distance$EditDistance$levenshtein,
+			$elm$core$String$toList(pattern),
+			$elm$core$String$toList(text)) : A2(
+			$emilianobovetti$edit_distance$EditDistance$levenshtein,
+			$elm$core$String$toList(text),
+			$elm$core$String$toList(pattern)));
 	});
 var $elm$json$Json$Encode$int = _Json_wrap;
 var $author$project$Main$sendDistance = _Platform_outgoingPort('sendDistance', $elm$json$Json$Encode$int);

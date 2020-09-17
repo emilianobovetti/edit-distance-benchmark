@@ -10,7 +10,7 @@ elm-app.js: node_modules
 
 .PHONY: run
 run: node_modules elm-app.js
-	node main.js
+	node index.js
 
 .PHONY: clean
 clean:
